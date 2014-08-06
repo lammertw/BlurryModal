@@ -93,6 +93,15 @@ static UIImageOrientation ImageOrientationFromInterfaceOrientation(UIInterfaceOr
 
 - (void)presentViewController:(UIViewController *)controller parentViewController:(UIViewController *)parentViewController
 {
+    if ([controller respondsToSelector:@selector(transitionCoordinator)]) {
+        [self presentBlurryViewController:controller parentViewController:parentViewController];
+    } else {
+        [parentViewController presentViewController:controller animated:YES completion:nil];
+    }
+}
+
+- (void)presentBlurryViewController:(UIViewController *)controller parentViewController:(UIViewController *)parentViewController
+{
     UIViewController* source = parentViewController;
     UIViewController* destination = controller;
     UIViewController* presented = destination;
