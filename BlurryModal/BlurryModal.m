@@ -11,6 +11,46 @@
 #import <UIImage+BlurredFrame/UIImage+ImageEffects.h>
 #import <MZAppearance/MZAppearance.h>
 
+static CGRect NormalizedWindowBoundsInView(UIView *sourceView)
+{
+    CGRect windowBounds = sourceView.window.bounds;
+    
+    // Normalize based on the orientation
+    CGRect nomalizedWindowBounds = [sourceView convertRect:windowBounds fromView:nil];
+    
+    return nomalizedWindowBounds;
+}
+
+@interface BlurryImageView : UIImageView
+
+@property (strong, nonatomic) id observer;
+
+@end
+
+@implementation BlurryImageView
+
+-(id)initWithImage:(UIImage *)image
+{
+    self = [super initWithImage:image];
+    if (self)
+    {
+        __weak typeof(self) weakSelf = self;
+        self.observer = [[NSNotificationCenter defaultCenter] addObserverForName:UIDeviceOrientationDidChangeNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
+            CGRect frame = weakSelf.frame;
+            frame.size = CGSizeMake(CGRectGetHeight(frame), CGRectGetWidth(frame));
+            weakSelf.frame = NormalizedWindowBoundsInView(weakSelf.superview);
+        }];
+    }
+    return self;
+}
+
+-(void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self.observer];
+}
+
+@end
+
 @implementation BlurryModal
 
 static UIImageOrientation ImageOrientationFromInterfaceOrientation(UIInterfaceOrientation orientation) {
@@ -51,14 +91,13 @@ static UIImageOrientation ImageOrientationFromInterfaceOrientation(UIInterfaceOr
     return self;
 }
 
-
 - (void)presentViewController:(UIViewController *)controller parentViewController:(UIViewController *)parentViewController
 {
     UIViewController* source = parentViewController;
     UIViewController* destination = controller;
     UIViewController* presented = destination;
     UIModalTransitionStyle transitionStyle = destination.modalTransitionStyle;
-
+    
     if ([destination isKindOfClass:[UINavigationController class]])
     {
         UINavigationController *navigationController = (UINavigationController *)destination;
@@ -67,8 +106,7 @@ static UIImageOrientation ImageOrientationFromInterfaceOrientation(UIInterfaceOr
     
     CGRect windowBounds = source.view.window.bounds;
     
-    // Normalize based on the orientation
-    CGRect nomalizedWindowBounds = [source.view convertRect:windowBounds fromView:nil];
+    CGRect nomalizedWindowBounds = NormalizedWindowBoundsInView(source.view);
     
     UIGraphicsBeginImageContextWithOptions(windowBounds.size, YES, 0.0);
     
@@ -83,17 +121,14 @@ static UIImageOrientation ImageOrientationFromInterfaceOrientation(UIInterfaceOr
     }
     else
     {
-        snapshot = [snapshot applyBlurWithRadius:self.backingImageBlurRadius.doubleValue
-                                       tintColor:self.backingImageTintColor
-                           saturationDeltaFactor:self.backingImageSaturationDeltaFactor.doubleValue
-                                       maskImage:nil];
+        snapshot = [snapshot applyBlurWithRadius:self.backingImageBlurRadius.doubleValue tintColor:self.backingImageTintColor saturationDeltaFactor:self.backingImageSaturationDeltaFactor.doubleValue maskImage:nil];
     }
     
     snapshot = [UIImage imageWithCGImage:snapshot.CGImage scale:1.0 orientation:ImageOrientationFromInterfaceOrientation([UIApplication sharedApplication].statusBarOrientation)];
     
     destination.view.clipsToBounds = YES;
     
-    UIImageView* backgroundImageView = [[UIImageView alloc] initWithImage:snapshot];
+    UIImageView* backgroundImageView = [[BlurryImageView alloc] initWithImage:snapshot];
     
     CGRect frame;
     switch (transitionStyle) {
@@ -101,10 +136,10 @@ static UIImageOrientation ImageOrientationFromInterfaceOrientation(UIInterfaceOr
             // Only the CoverVertical transition make sense to have an
             // animation on the background to make it look still while
             // destination view controllers animates from the bottom to top
-            frame = CGRectMake(0, -nomalizedWindowBounds.size.height, nomalizedWindowBounds.size.width, nomalizedWindowBounds.size.height);
+            frame = CGRectMake(0, CGRectGetMinY(nomalizedWindowBounds) - nomalizedWindowBounds.size.height, nomalizedWindowBounds.size.width, nomalizedWindowBounds.size.height);
             break;
         default:
-            frame = CGRectMake(0, 0, nomalizedWindowBounds.size.width, nomalizedWindowBounds.size.height);
+            frame = nomalizedWindowBounds;
             break;
     }
     backgroundImageView.frame = frame;
@@ -116,7 +151,7 @@ static UIImageOrientation ImageOrientationFromInterfaceOrientation(UIInterfaceOr
     
     [destination.transitionCoordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
         [UIView animateWithDuration:[context transitionDuration] animations:^{
-            backgroundImageView.frame = CGRectMake(0, 0, nomalizedWindowBounds.size.width, nomalizedWindowBounds.size.height);
+            backgroundImageView.frame = NormalizedWindowBoundsInView(source.view);
         }];
     } completion:nil];
 }
