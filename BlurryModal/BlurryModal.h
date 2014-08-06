@@ -1,18 +1,19 @@
 //
-//  BlurryModalSegue.h
-//  BlurryModal
+//  BlurryModal.h
+//  Pods
 //
-//  Created by Matthew Hupman on 11/21/13.
-//  Copyright (c) 2013 Citrrus. All rights reserved.
+//  Created by Lammert Westerhoff on 06/08/14.
+//
 //
 
 #import <UIKit/UIKit.h>
 
-@class BlurryModalSegue;
 
-typedef UIImage*(^ProcessBackgroundImage)(BlurryModalSegue* blurryModalSegue, UIImage* rawImage);
+@class BlurryModal;
 
-@interface BlurryModalSegue : UIStoryboardSegue
+typedef UIImage*(^ProcessBackgroundImage)(BlurryModal* blurryModal, UIImage* rawImage);
+
+@interface BlurryModal : NSObject
 
 @property (nonatomic, copy) ProcessBackgroundImage processBackgroundImage;
 
@@ -21,5 +22,7 @@ typedef UIImage*(^ProcessBackgroundImage)(BlurryModalSegue* blurryModalSegue, UI
 @property (nonatomic) UIColor* backingImageTintColor UI_APPEARANCE_SELECTOR;
 
 + (id)appearance;
+
+- (void)presentViewController:(UIViewController *)controller parentViewController:(UIViewController *)parentViewController;
 
 @end

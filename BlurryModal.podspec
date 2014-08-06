@@ -2,7 +2,7 @@ Pod::Spec.new do |s|
 
   git_tag         = '1.1.0'
 
-  s.name          = "BlurryModalSegue"
+  s.name          = "BlurryModal"
   s.version       = git_tag
   s.summary       = "A custom segue for providing a blurred overlay effect."
   s.description   = <<-DESC
@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
   s.author        = { "Matt Hupman" => "mhupman@citrrus.com" }
   s.platform      = :ios, '6.1'
   s.source        = { :git => "https://github.com/lammertw/BlurryModalSegue.git", :tag => git_tag }
-  s.source_files  = 'BlurryModalSegue'
+  s.source_files  = 'BlurryModal'
   s.framework     = 'QuartzCore'
   s.requires_arc  = true
   s.dependency 'UIImage+BlurredFrame', '~> 0.0.4'

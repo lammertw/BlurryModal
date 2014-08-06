@@ -1,15 +1,17 @@
 //
-//  BlurryModalSegue.m
-//  BlurryModal
+//  BlurryModal.m
+//  Pods
 //
-//  Created by Matthew Hupman on 11/21/13.
-//  Copyright (c) 2013 Citrrus. All rights reserved.
+//  Created by Lammert Westerhoff on 06/08/14.
+//
 //
 
-#import "BlurryModalSegue.h"
+#import "BlurryModal.h"
 #import <QuartzCore/QuartzCore.h>
 #import <UIImage+BlurredFrame/UIImage+ImageEffects.h>
 #import <MZAppearance/MZAppearance.h>
+
+@implementation BlurryModal
 
 static UIImageOrientation ImageOrientationFromInterfaceOrientation(UIInterfaceOrientation orientation) {
     switch (orientation)
@@ -28,16 +30,14 @@ static UIImageOrientation ImageOrientationFromInterfaceOrientation(UIInterfaceOr
     }
 }
 
-@implementation BlurryModalSegue
-
 + (id)appearance
 {
     return [MZAppearance appearanceForClass:[self class]];
 }
 
-- (id)initWithIdentifier:(NSString *)identifier source:(UIViewController *)source destination:(UIViewController *)destination
+- (id)init
 {
-    self = [super initWithIdentifier:identifier source:source destination:destination];
+    self = [super init];
     
     if (self)
     {
@@ -51,23 +51,24 @@ static UIImageOrientation ImageOrientationFromInterfaceOrientation(UIInterfaceOr
     return self;
 }
 
-- (void)perform
-{
-    UIViewController* source = (UIViewController*)self.sourceViewController;
-    UIViewController* destination = (UIViewController*)self.destinationViewController;
 
+- (void)presentViewController:(UIViewController *)controller parentViewController:(UIViewController *)parentViewController
+{
+    UIViewController* source = parentViewController;
+    UIViewController* destination = controller;
+    
     CGRect windowBounds = source.view.window.bounds;
     
     // Normalize based on the orientation
     CGRect nomalizedWindowBounds = [source.view convertRect:windowBounds fromView:nil];
     
     UIGraphicsBeginImageContextWithOptions(windowBounds.size, YES, 0.0);
-
+    
     [source.view.window drawViewHierarchyInRect:windowBounds afterScreenUpdates:NO];
     UIImage *snapshot = UIGraphicsGetImageFromCurrentImageContext();
     
     UIGraphicsEndImageContext();
-
+    
     if (self.processBackgroundImage)
     {
         snapshot = self.processBackgroundImage(self, snapshot);
@@ -85,7 +86,7 @@ static UIImageOrientation ImageOrientationFromInterfaceOrientation(UIInterfaceOr
     destination.view.clipsToBounds = YES;
     
     UIImageView* backgroundImageView = [[UIImageView alloc] initWithImage:snapshot];
-
+    
     CGRect frame;
     switch (destination.modalTransitionStyle) {
         case UIModalTransitionStyleCoverVertical:
@@ -103,7 +104,7 @@ static UIImageOrientation ImageOrientationFromInterfaceOrientation(UIInterfaceOr
     [destination.view addSubview:backgroundImageView];
     [destination.view sendSubviewToBack:backgroundImageView];
     
-    [self.sourceViewController presentModalViewController:self.destinationViewController animated:YES];
+    [source presentModalViewController:destination animated:YES];
     
     [destination.transitionCoordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
         [UIView animateWithDuration:[context transitionDuration] animations:^{
