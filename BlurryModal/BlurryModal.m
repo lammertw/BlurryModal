@@ -18,6 +18,11 @@ static CGRect NormalizedWindowBoundsInView(UIView *sourceView)
     // Normalize based on the orientation
     CGRect nomalizedWindowBounds = [sourceView convertRect:windowBounds fromView:nil];
     
+    if ([sourceView isKindOfClass:[UIScrollView class]]) {
+        CGPoint contentOffset = ((UIScrollView*)sourceView).contentOffset;
+        nomalizedWindowBounds = CGRectMake(CGRectGetMinX(nomalizedWindowBounds) - contentOffset.x, CGRectGetMinY(nomalizedWindowBounds) - contentOffset.y, CGRectGetWidth(nomalizedWindowBounds), CGRectGetHeight(nomalizedWindowBounds));
+    }
+    
     return nomalizedWindowBounds;
 }
 
