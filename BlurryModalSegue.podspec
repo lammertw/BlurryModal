@@ -12,8 +12,8 @@ Pod::Spec.new do |s|
   s.screenshots   = "https://raw.github.com/Citrrus/BlurryModalSegue/#{git_tag}/blurry_modal.gif"
   s.license       = 'MIT'
   s.author        = { "Matt Hupman" => "mhupman@citrrus.com" }
-  s.platform      = :ios, '7.0'
-  s.source        = { :git => "https://github.com/Citrrus/BlurryModalSegue.git", :tag => git_tag }
+  s.platform      = :ios, '6.1'
+  s.source        = { :git => "https://github.com/lammertw/BlurryModalSegue.git", :tag => git_tag }
   s.source_files  = 'BlurryModalSegue'
   s.framework     = 'QuartzCore'
   s.requires_arc  = true
